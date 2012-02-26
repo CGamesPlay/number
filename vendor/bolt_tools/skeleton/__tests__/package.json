@@ -1,0 +1,22 @@
+{
+  "name": "__PROJECT_NAME___tests",
+  "version": "0.0.0",
+  "main": "tests",
+  "modulr": {
+    "paths": [
+      "./",
+      "../lib",
+      "../../"
+    ]
+  },
+  "bolt_build_manifest": {
+    "sources": [
+      "test.html"
+    ],
+    "copies": [
+      "../lib/vendor/jasmine"
+    ],
+    "package_target": "../__PROJECT_TARGET__",
+    "package_name": "__PROJECT_NAME___tests"
+  }
+}

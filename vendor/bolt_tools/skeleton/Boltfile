@@ -1,0 +1,11 @@
+// Add project specific bolt tasks here
+
+// EXAMPLE:
+var child_process = require('child_process');
+
+desc('count lines');
+task('count_lines', function(args, options) {
+  child_process.exec('find . -type f | xargs cat | wc -l', function(err, stdout, stderr) {
+    banner('project linecount: ' + stdout.trim());
+  });
+});

@@ -1,0 +1,19 @@
+{
+  "name": "__PROJECT_NAME__",
+  "version": "0.0.0",
+  "main": "lib/main",
+  "modulr": {
+    "paths": [
+      "./lib",
+      "../"
+    ]
+  },
+  "bolt_build_manifest": {
+    "require_css": true,
+    "sources": [
+      "index.html"
+    ],
+    "package_target": "pkg/",
+    "package_name": "__PROJECT_NAME__"
+  }
+}

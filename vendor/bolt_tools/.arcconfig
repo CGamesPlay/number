@@ -1,0 +1,5 @@
+{
+  "project_id" : "bolt_tools",
+  "conduit_uri" : "https://phabricator.fb.com/api/"
+}
+

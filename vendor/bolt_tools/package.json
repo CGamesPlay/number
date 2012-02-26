@@ -1,0 +1,25 @@
+{
+  "name": "bolt_tools",
+  "description": "Simple tasks for JavaScript projects",
+  "homepage": "http://boltjs.org",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:facebook/bolt_tools.git"
+  },
+  "version": "0.1.0",
+  "bin": {"bolt": "bolt"},
+  "dependencies": {
+    "uglify-js": "=1.1.1",
+    "colors": "=0.5.1",
+    "cli": "=0.3.7",
+    "less": "=1.1.5",
+    "modulr": "=0.8.4",
+    "underscore": "=1.2.3",
+    "mkdirp": "=0.2.1",
+    "ncp": "=0.2.3",
+    "rimraf": "=1.0.9"
+  },
+  "devDependencies": {
+    "jasmine-node": "=1.0.13"
+  }
+}

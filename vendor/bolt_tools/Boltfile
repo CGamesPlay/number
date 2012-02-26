@@ -1,0 +1,7 @@
+require('./tasks/info.js');
+require('./tasks/test.js');
+require('./tasks/build.js');
+require('./tasks/clean.js');
+require('./tasks/new.js');
+require('./tasks/graph.js');
+require('./tasks/build_explorer.js');

@@ -1,0 +1,171 @@
+#!/usr/bin/env node
+var fs          = require('fs');
+var path        = require('path');
+var colors      = require('colors');
+var cli         = require('cli');
+var tty         = require('tty');
+var currentDesc = null;
+
+global.tasks = {};
+
+// Namespace the global helper functions
+global.boltUtil = require('./lib/bolt_util');
+global.boltManifest = require('./lib/bolt_manifest');
+
+// Bolt API
+global.banner = function(message) {
+  console.log('\u26A1 Bolt: '.yellow + message);
+};
+
+global.desc = function(description) {
+  currentDesc = description;
+};
+
+// API for defining a new Task
+global.task = function (name, dependenciesOrFunc, funcOrNull) {
+  // determine if we have dependencies passed in
+  var func, dependencies;
+  if (funcOrNull) {
+    dependencies = dependenciesOrFunc;
+    func = funcOrNull;
+  } else {
+    func = dependenciesOrFunc;
+  }
+
+  var task = new Task({
+    name:         name,
+    description:  currentDesc,
+    dependencies: dependencies,
+    func:         func
+  });
+
+  // clean up the current description for the next task
+  currentDesc = null;
+  return task;
+};
+
+// Execute a task
+global.exec = function(name, args, options, callback) {
+  tasks[name].run(args, options, callback);
+};
+
+// Task class
+var Task = function(opts) {
+  for (var opt in opts) {
+    this[opt] = opts[opt];
+  }
+  tasks[this.name] = this;
+};
+
+Task.runQueue = function(queue, args, options, callback) {
+  if (queue.length === 0) {
+    callback && callback();
+    return;
+  }
+
+  var taskName = queue.shift();
+  var task = tasks[taskName];
+  if (typeof task === 'undefined') {
+    banner(('Cannot find task definition for "' + taskName + '"').red);
+    process.exit(1);
+  }
+
+  var defer = {
+    completed: false,
+    complete: function() {
+      if (!this.completed) {
+        this.completed = true;
+        Task.runQueue(queue, args, options, callback);
+      }
+    },
+    error: function() {
+      banner(('Task aborted while running ' + task.name).red);
+    }
+  };
+
+  var taskRet = task.func(args, options, defer);
+
+  // If the function returns anything but the deferred (this also covers the
+  // case where the task has no return statment) we move on to the next step
+  // immediately
+  if (taskRet !== defer) {
+    defer.complete();
+  }
+};
+
+// returns the list of dependencies' names without duplicates in the order they
+// should be run (this is effectively a post-order traversal of the dependency
+// tree)
+Task.prototype.getSerialRunOrder = function(queued) {
+  var order = [];
+
+  if (queued && queued.indexOf(this.name) !== -1) {
+    // If the task has already been queued as the dependency
+    // of something else, don't double-run the task
+    return [];
+  }
+
+  if (typeof this.dependencies !== 'undefined') {
+    this.dependencies.forEach(function (taskName) {
+      var task = tasks[taskName];
+      order = order.concat(task.getSerialRunOrder(order));
+    });
+  }
+
+  order.push(this.name);
+  return order;
+};
+
+// run the current task's dependencies and then run the task itself
+Task.prototype.run = function(args, options, callback) {
+  Task.runQueue(this.getSerialRunOrder(), args, options, callback);
+};
+
+// return the description of the current task
+Task.prototype.describe = function() {
+  var desc = '* ' + this.name.green;
+  if (this.description) {
+    desc += ' - ' + this.description;
+  }
+  if (this.dependencies) {
+    desc += ' - depends on: ' + this.dependencies;
+  }
+  return desc;
+};
+
+
+var main_bolt_file_path = path.join(__dirname, 'Boltfile');
+require(main_bolt_file_path);
+
+var project_bolt_file_path = path.join(process.cwd(), 'Boltfile');
+try {
+  require(project_bolt_file_path);
+} catch(e) {
+  // Stupid JavaScript exceptions and e.type being undefined
+  if (/Cannot find module '.*Boltfile'/.test(e.message)) {
+    // Ignore missing Boltfiles
+  } else {
+    throw e;
+  }
+}
+
+// slice off the default arguments node interpreter and js program name
+var args = process.argv.slice(2);
+
+var taskDescriptions = {};
+for (var taskName in tasks) {
+  var task = tasks[taskName];
+  taskDescriptions[task.name] = task.description || '';
+}
+
+if (args.length > 1) {
+  cli.disable('help');
+}
+cli.parse(false, taskDescriptions);
+
+if (cli.options['no-color']) {
+  colors.mode = 'none';
+}
+
+var task = tasks[cli.command];
+task && task.run(cli.args, cli.options);

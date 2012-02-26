@@ -1,0 +1,45 @@
+{
+  "name": "number",
+  "version": "0.0.1",
+  "private": true,
+  "engines": {
+    "node": "=0.6.6"
+  },
+  "dependencies": {
+    "backbone": "*",
+    "cli": "*",
+    "colors": "=0.5.1",
+    "express": "2.5.8",
+    "less": "*",
+    "mkdirp": "=0.2.1",
+    "modulr": "https://github.com/CGamesPlay/modulr-node/tarball/custom-module-grapher",
+    "mustache": "*",
+    "ncp": "=0.2.3",
+    "pg": "*",
+    "rimraf": "=1.0.9",
+    "uglify-js": "=1.1.1",
+    "underscore": "*"
+  },
+
+  "scripts": {
+    "postinstall": "vendor/bolt_tools/bolt build --environment=prod -m"
+  },
+
+  "main": "src/index",
+  "directories": {"lib": "." },
+  "modulr": {
+    "paths": [
+      "src/",
+      "node_modules/"
+    ]
+  },
+  "bolt_build_manifest": {
+    "require_css": true,
+    "sources": [
+      "src/index.html",
+      "src/channel.html"
+    ],
+    "package_target": "public/",
+    "package_name": "number"
+  }
+}
