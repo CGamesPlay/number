@@ -76,7 +76,8 @@ var ChangeNumberView = Backbone.View.extend({
         alert('Something went wrong.');
       },
       success: function() {
-        // Leave button disabled.
+        me.model.set('number', 0);
+        me.$(':jqmData(action="submit")').removeAttr('disabled');
         $.mobile.hidePageLoadingMsg();
         me.trigger('change');
       }
