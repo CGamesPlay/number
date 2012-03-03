@@ -29,7 +29,6 @@
   "directories": {"lib": "." },
   "modulr": {
     "paths": [
-      "src/",
       "node_modules/"
     ]
   },
